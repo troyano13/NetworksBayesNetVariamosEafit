@@ -20,14 +20,19 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 
 public class JsonReader {
 
-    public static void main(String[] args) throws Exception {
-        toRedJsonFeature();
-        toRedXMLFeature();
-        createEditableBayesNet();
+   public static ArrayList<Object> nodesXml = new ArrayList<Object>();
+    private ArrayList<Object> Objectov;
+
+
+    public   static void main(String[] args) throws Exception {
+        //  toRedJsonFeature();
+        toRedXMLFeature2();
+        createEditableBayesNet( nodesXml);
     }
 
     public static void toRedJsonFeature() throws IOException, ParseException {
@@ -59,44 +64,62 @@ public class JsonReader {
         }
     }
 
-    public static void toRedXMLFeature() throws IOException, SAXException, ParserConfigurationException {
-
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
+    public static ArrayList<Object> toRedXMLFeature2() throws IOException, SAXException, ParserConfigurationException {
 
         File inputFile = new File("src/resources/Models-testDaniel.xml");
-        Document documentXML = builder.parse(inputFile);
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        Document doc = dBuilder.parse(inputFile);
+        doc.getDocumentElement().normalize();
 
-        documentXML.getDocumentElement().normalize();
-        System.out.println("documentXML-->" + documentXML.getDocumentElement().getNodeName());
+        NodeList nodeList = doc.getElementsByTagName("abstract");
 
-        Element root2 = documentXML.getDocumentElement();
-
-        NodeList childNodes = documentXML.getElementsByTagName("root");
+        ArrayList<Object> nodeXml = new ArrayList<Object>();
 
 
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            Node node = childNodes.item(i);
-            System.out.println("ChildNodes-->" + node.getNodeName());
+        // Node list
+        for (int temp = 0; temp < nodeList.getLength(); temp++) {
+            Node node = nodeList.item(temp);
 
             if (node.getNodeType() == Node.ELEMENT_NODE) {
-                Element element = (Element) node;
 
-                NodeList childChildNodes = element.getChildNodes();
+                String label = ((Element) node).getAttribute("label");
+                String labelParent = String.valueOf(((Element) node).getParentNode().getNodeName());
+                String type = ((Element) node).getAttribute("type");
+                String id = ((Element) node).getAttribute("id");
 
-                for (int e = 0; e < childChildNodes.getLength(); e++) {
-                    Node nodeHijo = childChildNodes.item(e);
+                // "mxGeometry"
+                Element mxGeometry = (Element) ((Element) node).getElementsByTagName("mxGeometry").item(0);
+                String x = mxGeometry.getAttribute("x");
+                String y = mxGeometry.getAttribute("y");
+                String width = mxGeometry.getAttribute("width");
+                String height = mxGeometry.getAttribute("height");
 
-                    if (nodeHijo.getNodeType() == Node.ELEMENT_NODE) {
-                        System.out.println("Name->" + nodeHijo.getNodeName());
-                        System.out.println("Attributes->" + nodeHijo.getAttributes().getNamedItem("label"));
-                        System.out.println("NodeType-> " + nodeHijo.getNodeType());
-                        System.out.println("NodeValue->" + nodeHijo.getNodeValue());
-                        System.out.println("ParentNode->" + nodeHijo.getParentNode());
-                    }
-                }
+                // node valor of xml
+                System.out.println("label: " + label);
+                System.out.println("labelParent: " + labelParent);
+                System.out.println("type: " + type);
+                System.out.println("id: " + id);
+                System.out.println("x: " + x);
+                System.out.println("y: " + y);
+                System.out.println("width: " + width);
+                System.out.println("height: " + height);
+
+
+                nodeXml.add("label: " + label);
+                nodeXml.add("labelParent: " + labelParent);
+                nodeXml.add("type: " + type);
+                nodeXml.add("id: " + id);
+                nodeXml.add("x: " + x);
+                nodeXml.add("y: " + y);
+                nodeXml.add("width: " + width);
+                nodeXml.add("height: " + height);
+                System.out.println("  " + nodeXml);
+
+                return nodeXml;
             }
         }
+        return nodeXml;
     }
 
 
@@ -110,11 +133,21 @@ public class JsonReader {
         bifReader.processString(m_BayesNet.toXMLBIF03());
         System.out.println(" m_BayesNet3---->>>" + m_BayesNet.toXMLBIF03());
 
+        // obtein nodes
+        // String[] options = new String[m_BayesNet.getNrOfNodes()];
+        //
+
 
     }
 
 
-    public static void createEditableBayesNet() throws Exception {
+
+    public static void createEditableBayesNet(ArrayList<Object> nodesXml) throws Exception {
+
+
+        System.out.println("***"+nodesXml);
+
+
 
         String tmpfilename = "src/resources/library3.xml";
         FileWriter outfile = new FileWriter(tmpfilename);
@@ -125,6 +158,8 @@ public class JsonReader {
         BIFReader bifReader = new BIFReader();
         bifReader.processString(m_BayesNet.toXMLBIF03());
         System.out.println(" m_BayesNet3---->>>" + m_BayesNet.toXMLBIF03());
+
+        // m_BayesNet.addNode(nodesXml.get());
 
         m_BayesNet.addNode("TestPruebaA", 1, 100, 100);
         m_BayesNet.addNode("TestPruebaB", 1, 100, 100);

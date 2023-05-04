@@ -17,6 +17,7 @@
         <mxGeometry x="110" y="130" width="100" height="35" as="geometry"/>
       </mxCell>
     </abstract>
+
     <rel_abstract_root type="relation" relType="mandatory" id="0.3">
       <mxCell parent="feature" source="3" target="1" edge="1">
         <mxGeometry relative="1" as="geometry"/>
