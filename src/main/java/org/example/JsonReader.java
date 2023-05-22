@@ -330,11 +330,24 @@ public class JsonReader {
             if (feature.getType() != "relation" && feature.getLabel() != null) {
                 int nPosX = Integer.parseInt(feature.getX());
                 int nPosY = Integer.parseInt(feature.getY());
-                m_BayesNet.addNode(feature.getId(), 1, nPosX, nPosY);
+                m_BayesNet.addNode(feature.getId(), 2, nPosX, nPosY);
+
 
             } else if (feature.getLabel() == null) {
-                System.out.println("creacion arcos" + feature.getLabelParent());
+
+                System.out.println("creacion arcos" + feature.getTarget());
                 m_BayesNet.addArc(feature.getTarget(), feature.getSource());
+                double[][] matrize = m_BayesNet.getDistribution(feature.getTarget());
+                System.out.println("Es......." + matrize.length + matrize);
+
+                for (int i = 0; i < matrize.length; i++) {
+
+                    for (int j = 0; j < matrize[i].length; j++) {
+                        System.out.print(matrize[i][j] + " ");
+                    }
+                    System.out.println();
+                }
+                m_BayesNet.setDistribution(feature.getTarget(), matrize);
 
             } else {
                 break; // Finaliza el bucle cuando se encuentra un nodo nulo
@@ -346,5 +359,16 @@ public class JsonReader {
         outfile.close();
     }
 
+    public static void editCPT(String nTargetNode) throws Exception {
+        int nTargetNodee = Integer.parseInt(nTargetNode);
+        EditableBayesNet m_BayesNet = new EditableBayesNet(true);
+        System.out.println("nTargetNode-->" + nTargetNode);
+
+        // int nParents= m_BayesNet.getNrOfParents(Integer.parseInt(nTargetNode));
+
+        m_BayesNet.estimateCPTs();
+
+
+    }
 
 }
