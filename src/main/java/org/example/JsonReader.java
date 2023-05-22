@@ -337,8 +337,9 @@ public class JsonReader {
 
                 System.out.println("creacion arcos" + feature.getTarget());
                 m_BayesNet.addArc(feature.getTarget(), feature.getSource());
+
+                System.out.println("CPT");
                 double[][] matrize = m_BayesNet.getDistribution(feature.getTarget());
-                System.out.println("Es......." + matrize.length + matrize);
 
                 for (int i = 0; i < matrize.length; i++) {
 
