@@ -14,6 +14,7 @@ public class Feature {
     private String source;
     private String target;
 
+
     public Feature(String label, String labelParent, String type, String id, String x, String y, String width, String height, String source, String target) {
         this.label = label;
         this.labelParent = labelParent;
@@ -98,6 +99,14 @@ public class Feature {
 
     public void setSource(String source) {
         this.source = source;
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
     }
 
 
