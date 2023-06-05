@@ -26,10 +26,7 @@ import weka.classifiers.bayes.net.BayesNetGenerator;
 import weka.classifiers.bayes.net.EditableBayesNet;
 import weka.classifiers.bayes.net.MarginCalculator;
 import weka.classifiers.bayes.net.MarginCalculator.JunctionTreeNode;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.SerializedObject;
-import weka.core.Utils;
+import weka.core.*;
 import weka.core.converters.AbstractFileLoader;
 import weka.core.converters.AbstractFileSaver;
 import weka.core.converters.ArffSaver;
@@ -54,6 +51,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Random;
 
 /**
@@ -866,6 +864,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                             m_BayesNet.buildClassifier(m_Instances);
                             layoutGraph();
                             updateStatus();
+                            m_BayesNet.distributionsForInstances(m_Instances);
                             m_BayesNet.clearUndoStack();
 
                             dlg.setVisible(false);
@@ -977,9 +976,11 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                 try {
                     if (loader != null) {
                         m_Instances = loader.getDataSet();
+                        System.out.println("15");
                     }
                     if (m_Instances.classIndex() == -1) {
                         m_Instances.setClassIndex(m_Instances.numAttributes() - 1);
+                        System.out.println("16");
                     }
                     a_learn.setEnabled(true);
                     a_learnCPT.setEnabled(true);
@@ -1690,13 +1691,16 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
             int rval = fc.showSaveDialog(GUI.this);
 
             if (rval == JFileChooser.APPROVE_OPTION) {
+                System.out.println("13");
                 // System.out.println("Saving to file \""+
                 // f.getAbsoluteFile().toString()+"\"");
                 String sFileName = fc.getSelectedFile().toString();
                 if (!sFileName.endsWith(".xml")) {
                     sFileName = sFileName.concat(".xml");
+                    System.out.println("14");
                 }
                 saveFile(sFileName);
+                System.out.println("15");
                 return true;
             }
             return false;
@@ -2590,7 +2594,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
          * Draw a node with index iNode on Graphics g at position Drawing mode can
          * be NORMAL or HIGHLIGHTED.
          */
-        protected void drawNode(Graphics g, int iNode, int mode) {
+        protected <DistributionEstimator> void drawNode(Graphics g, int iNode, int mode) {
 
             int nPosX = m_BayesNet.getPositionX(iNode);
             int nPosY = m_BayesNet.getPositionY(iNode);
@@ -2633,6 +2637,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
             }
 
             if (m_bViewMargins) {
+
                 System.out.println("--m_bViewMargins-" + m_bViewMargins);
                 if (m_BayesNet.getEvidence(iNode) < 0) {
                     g.setColor(new Color(0, 128, 0));
@@ -2640,13 +2645,68 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                 } else {
                     g.setColor(new Color(128, 0, 0));
                 }
-                double[] P = m_BayesNet.getMargin(iNode);
-                System.out.println("--P-" + "___P__" + P + m_BayesNet.getMargin(iNode).toString());
+                // System.out.println("************* " + m_marginCalculatorWithEvidence.toString());
 
+                ////////////////////////
+                System.out.println("margin");
+                double[] P = m_BayesNet.getMargin(iNode);
+                System.out.println("12");
+                System.out.println("--P-" + "___P__" + P);
                 for (int iValue = 0; iValue < P.length; iValue++) {
                     System.out.println("iValue-->" + P[iValue] + "" + "iValue p-->" + P + "[iValue]--> " + iValue);
                     String sP = P[iValue] + "";
-                    System.out.println("--sP%--" + sP + "%");
+
+                    System.out.println("--sP%--" + sP + "%" + "----------ññññ");
+
+                    //////
+
+                    System.out.println("Probabilidades");
+
+                    Attribute nameN = new Attribute("a");
+                    Attribute classIndex = new Attribute("c");
+
+                    FastVector attributes = new FastVector(1);
+                    attributes.addElement(nameN);
+                    attributes.addElement(classIndex);
+
+                    Instances m_Instances = new Instances("SampleInstances", attributes, 1);
+                    Instance m_Instance = new DenseInstance(1);
+
+                    m_Instance.setDataset(m_Instances);
+                    m_Instance.setValue(nameN, 2);
+                    m_Instance.setValue(nameN, 3);
+                    m_Instance.setValue(classIndex, nameN.index());
+
+                 //    m_Instances.setClassIndex(0); // Establecer el índice del atributo de clase (en este caso, el atributo "nameN")
+                    m_Instances.add(m_Instance);
+                    System.out.println("yyyyy"+m_Instances);
+
+                  /*  if (GUI.this.m_Instances.attribute(String.valueOf(classIndex)).numValues() <= 1) {
+                      //  m_Instances.deleteAttributeAt(classIndex);
+                    }*/
+                    System.out.println("try se fue" );
+                     try {
+                        //  double[][] posteriorProbabilities = m_BayesNet.distributionsForInstances(m_Instances);
+                         System.out.println("vaa");
+                         double[][] posteriorProbabilities = new double[][]{m_BayesNet.distributionForInstance(m_Instance)};
+                         System.out.println("posteriori");
+                        for (int i = 0; i < posteriorProbabilities.length; i++) {
+                            System.out.println("for1");
+                            for (int j = 0; j < posteriorProbabilities[i].length; j++) {
+                                System.out.println("for2");
+                                double posterior = posteriorProbabilities[i][j];
+                                System.out.println("Probabilidad posterior para la instancia " + i + " y la clase " + j + ": " + posterior);
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    ///
+
+
+                    //////
+
                     if (sP.charAt(0) == '0') {
                         sP = "0" + sP.substring(1) + "0";
                         System.out.println("--sP%-->" + sP + "%");
@@ -2662,13 +2722,9 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                     g.drawString(m_BayesNet.getNodeValue(iNode, iValue) + " " + sP + " ", nPosX
                             + m_nPaddedNodeWidth + (int) (P[iValue] * 100), nPosY + iValue * 10
                             + 10);
-                    System.out.println("--m_nPaddedNodeWidth--->" + m_nPaddedNodeWidth + "--" + m_BayesNet);
-
                 }
             }
             if (m_bViewCliques) {
-                System.out.println("-m_bViewMargins-->" + m_bViewMargins);
-
                 return;
             }
             g.setColor(Color.black);
@@ -2861,7 +2917,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
         final double[][] m_fProbs;
 
         public GraphVisualizerTableModel(int iNode) {
-
+            System.out.println("-prooo-");
             double[][] probs = m_BayesNet.getDistribution(iNode);
             m_fProbs = new double[probs.length][probs[0].length];
             for (int i = 0; i < probs.length; i++) {
@@ -2869,7 +2925,9 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                     m_fProbs[i][j] = probs[i][j];
                 }
             }
+            System.out.println("-prooo set values get-");
             m_sColumnNames = m_BayesNet.getValues(iNode);
+            System.out.println("-prooo 2set values get-");
         } // c'tor
 
         /**
@@ -3952,7 +4010,9 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
             public void actionPerformed(ActionEvent ae) {
                 tm.setData();
                 try {
+                    System.out.println("-set dsitribution-");
                     m_BayesNet.setDistribution(m_nCurrentNode, tm.m_fProbs);
+                    System.out.println("-pstt dsitribution-");
                     m_jStatusBar.setText(m_BayesNet.lastActionMsg());
                     updateStatus();
                 } catch (Exception e) {
