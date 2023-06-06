@@ -21,6 +21,7 @@ package org.example;
  *
  */
 
+import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.BIFReader;
 import weka.classifiers.bayes.net.BayesNetGenerator;
 import weka.classifiers.bayes.net.EditableBayesNet;
@@ -51,7 +52,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Random;
 
 /**
@@ -2660,49 +2660,63 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
                     //////
 
-                    System.out.println("Probabilidades");
+                    System.out.println("Posterior Probablity");
 
-                    Attribute nameN = new Attribute("a");
-                    Attribute classIndex = new Attribute("c");
+                    try {
+                        // Create attributes
+                        Attribute attribute1 = new Attribute("Node1");
+                        Attribute attribute2 = new Attribute("Node2");
+                        Attribute attribute3 = new Attribute("Node3");
+                        Attribute attribute4 = new Attribute("Node4");
+                        FastVector classValues = new FastVector();
+                        classValues.addElement("Class1");
+                        classValues.addElement("Class2");
+                        Attribute classAttribute = new Attribute("Class", classValues);
 
-                    FastVector attributes = new FastVector(1);
-                    attributes.addElement(nameN);
-                    attributes.addElement(classIndex);
+                        // Create instances and add attributes
+                        FastVector attributes = new FastVector(5);
+                        attributes.addElement(attribute1);
+                        attributes.addElement(attribute2);
+                        attributes.addElement(attribute3);
+                        attributes.addElement(attribute4);
+                        attributes.addElement(classAttribute);
+                        Instances instances = new Instances("SampleInstances", attributes, 1);
 
-                    Instances m_Instances = new Instances("SampleInstances", attributes, 1);
-                    Instance m_Instance = new DenseInstance(1);
+                        // Create instance and set values
+                        Instance instance = new DenseInstance(5);
+                        instance.setValue(attribute1, 1);
+                        instance.setValue(attribute2, 1);
+                        instance.setValue(attribute3, 0);
+                        instance.setValue(attribute4, 0);
+                        instance.setValue(classAttribute, "Class1");
+                        instances.add(instance);
 
-                    m_Instance.setDataset(m_Instances);
-                    m_Instance.setValue(nameN, 2);
-                    m_Instance.setValue(nameN, 3);
-                    m_Instance.setValue(classIndex, nameN.index());
+                        // Set class index
+                        instances.setClassIndex(classAttribute.index());
 
-                 //    m_Instances.setClassIndex(0); // Establecer el índice del atributo de clase (en este caso, el atributo "nameN")
-                    m_Instances.add(m_Instance);
-                    System.out.println("yyyyy"+m_Instances);
+                        // Create and build the Bayes network classifier
+                        BayesNet bayesNet = new BayesNet();
+                        bayesNet.buildClassifier(instances);
 
-                  /*  if (GUI.this.m_Instances.attribute(String.valueOf(classIndex)).numValues() <= 1) {
-                      //  m_Instances.deleteAttributeAt(classIndex);
-                    }*/
-                    System.out.println("try se fue" );
-                     try {
-                        //  double[][] posteriorProbabilities = m_BayesNet.distributionsForInstances(m_Instances);
-                         System.out.println("vaa");
-                         double[][] posteriorProbabilities = new double[][]{m_BayesNet.distributionForInstance(m_Instance)};
-                         System.out.println("posteriori");
-                        for (int i = 0; i < posteriorProbabilities.length; i++) {
-                            System.out.println("for1");
-                            for (int j = 0; j < posteriorProbabilities[i].length; j++) {
-                                System.out.println("for2");
-                                double posterior = posteriorProbabilities[i][j];
-                                System.out.println("Probabilidad posterior para la instancia " + i + " y la clase " + j + ": " + posterior);
-                            }
-                        }
+                        // Create a new instance for testing
+                        Instance testInstance = new DenseInstance(5);
+                        testInstance.setValue(attribute1, 0);
+                        testInstance.setValue(attribute2, 1);
+                        testInstance.setValue(attribute3, 0);
+                        testInstance.setValue(attribute4, 0);
+                        testInstance.setDataset(instances);
+
+                        // Classify the test instance
+                        double predictedClass = bayesNet.classifyInstance(testInstance);
+
+                        // Get the class label for the predicted class value
+                        String predictedClassName = instances.classAttribute().value((int) predictedClass);
+
+                        // Print the predicted class label
+                        System.out.println("Predicted class: " + predictedClassName.toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-
-                    ///
 
 
                     //////
