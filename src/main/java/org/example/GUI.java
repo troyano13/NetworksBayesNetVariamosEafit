@@ -2647,10 +2647,9 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                 }
                 // System.out.println("************* " + m_marginCalculatorWithEvidence.toString());
 
-                ////////////////////////
+                ///////////////////////////////////////////////////////////////////////////////////
                 System.out.println("margin");
                 double[] P = m_BayesNet.getMargin(iNode);
-                System.out.println("12");
                 System.out.println("--P-" + "___P__" + P);
                 for (int iValue = 0; iValue < P.length; iValue++) {
                     System.out.println("iValue-->" + P[iValue] + "" + "iValue p-->" + P + "[iValue]--> " + iValue);
@@ -2658,8 +2657,18 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
                     System.out.println("--sP%--" + sP + "%" + "----------ññññ");
 
-                    //////
+                    ////////////////////////////////////////////////
 
+                      System.out.println("CPT for intance");
+
+                    double[][] probabilities =  m_BayesNet.getDistribution(iNode);
+                    for (int i = 0; i < probabilities.length; i++) {
+                        for (int j = 0; j < probabilities[i].length; j++) {
+                            double posterior = probabilities[i][j];
+                            System.out.println("Probability for instance " + i + " and class " + j + ": " + posterior);
+                        }
+                    }
+////////////////////////////////////////////////////////////////////////
                     System.out.println("Posterior Probablity");
 
                     try {
@@ -2728,11 +2737,13 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                     }
 
 
-                    //////
+                    //////////////////////////////////////////////////////////////////
 
                     if (sP.charAt(0) == '0') {
                         sP = "0" + sP.substring(1) + "0";
                         System.out.println("--sP%-->" + sP + "%");
+
+
                     }
                     if (sP.length() > 5) {
                         sP = "0" + sP.substring(1, 5);
