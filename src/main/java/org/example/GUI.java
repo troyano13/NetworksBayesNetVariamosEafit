@@ -2714,6 +2714,15 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
                         // Print the predicted class label
                         System.out.println("Predicted class: " + predictedClassName.toString());
+
+                        double[] classProbabilities = bayesNet.distributionForInstance(testInstance);
+
+                        // Recorrer las probabilidades posteriores y mostrarlas
+                        for (int i = 0; i < classProbabilities.length; i++) {
+                            String className = instances.classAttribute().value(i);
+                            double classProbability = classProbabilities[i];
+                            System.out.println("Class: " + className + ", Probability: " + classProbability);
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
