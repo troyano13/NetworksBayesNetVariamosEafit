@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
+
 /**
  * GUI interface to Bayesian Networks. Allows editing Bayesian networks on
  * screen and provides GUI interface to various Bayesian network facilities in
@@ -2659,61 +2660,64 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
                     ////////////////////////////////////////////////
 
-                      System.out.println("CPT for intance");
-
-                    double[][] probabilities =  m_BayesNet.getDistribution(iNode);
-                    for (int i = 0; i < probabilities.length; i++) {
-                        for (int j = 0; j < probabilities[i].length; j++) {
-                            double posterior = probabilities[i][j];
-                            System.out.println("Probability for instance " + i + " and class " + j + ": " + posterior);
-                        }
-                    }
-////////////////////////////////////////////////////////////////////////
-                    System.out.println("Posterior Probablity");
-
+                    System.out.println("recorriendo!!!");
                     try {
-                        // Create attributes
-                        Attribute attribute1 = new Attribute("Node1");
-                        Attribute attribute2 = new Attribute("Node2");
-                        Attribute attribute3 = new Attribute("Node3");
-                        Attribute attribute4 = new Attribute("Node4");
                         FastVector classValues = new FastVector();
                         classValues.addElement("Class1");
                         classValues.addElement("Class2");
                         Attribute classAttribute = new Attribute("Class", classValues);
 
-                        // Create instances and add attributes
-                        FastVector attributes = new FastVector(5);
-                        attributes.addElement(attribute1);
-                        attributes.addElement(attribute2);
-                        attributes.addElement(attribute3);
-                        attributes.addElement(attribute4);
+                        FastVector attributes = new FastVector();
                         attributes.addElement(classAttribute);
+
+                        double[][] probabilities = m_BayesNet.getDistribution(iNode);
+
+                        // Create and add attributes dynamically
+                        for (int j = 0; j < probabilities[0].length; j++) {
+                            Attribute attribute = new Attribute("Node" + (j + 1));
+                            attributes.addElement(attribute);
+                        }
+
                         Instances instances = new Instances("SampleInstances", attributes, 1);
 
-                        // Create instance and set values
-                        Instance instance = new DenseInstance(5);
-                        instance.setValue(attribute1, 1);
-                        instance.setValue(attribute2, 1);
-                        instance.setValue(attribute3, 0);
-                        instance.setValue(attribute4, 0);
-                        instance.setValue(classAttribute, "Class1");
-                        instances.add(instance);
+                        // Create instances and set values dynamically
+                        for (int i = 0; i < probabilities.length; i++) {
+                            Instance instance = new DenseInstance(attributes.size());
+                            instance.setDataset(instances);
+
+                            for (int j = 0; j < probabilities[i].length; j++) {
+                                double posterior = probabilities[i][j];
+                                if (j >= attributes.size()) {
+                                    System.err.println("Índice inválido: " + j);
+                                    continue;
+                                }
+                                Attribute attribute = (Attribute) attributes.elementAt(j);
+                                instance.setValue(attribute, posterior);
+                            }
+
+                            instances.add(instance);
+                        }
 
                         // Set class index
-                        instances.setClassIndex(classAttribute.index());
+                        instances.setClassIndex(0);
 
-                        // Create and build the Bayes network classifier
                         BayesNet bayesNet = new BayesNet();
                         bayesNet.buildClassifier(instances);
 
                         // Create a new instance for testing
-                        Instance testInstance = new DenseInstance(5);
-                        testInstance.setValue(attribute1, 0);
-                        testInstance.setValue(attribute2, 1);
-                        testInstance.setValue(attribute3, 0);
-                        testInstance.setValue(attribute4, 0);
+                        Instance testInstance = new DenseInstance(attributes.size());
                         testInstance.setDataset(instances);
+
+                        // Set values for the test instance dynamically
+                        for (int j = 0; j < probabilities[0].length; j++) {
+                            double posterior = probabilities[0][j];
+                            if (j >= attributes.size()) {
+                                System.err.println("Índice inválido: " + j);
+                                continue;
+                            }
+                            Attribute attribute = (Attribute) attributes.elementAt(j);
+                            testInstance.setValue(attribute, posterior);
+                        }
 
                         // Classify the test instance
                         double predictedClass = bayesNet.classifyInstance(testInstance);
@@ -2722,7 +2726,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                         String predictedClassName = instances.classAttribute().value((int) predictedClass);
 
                         // Print the predicted class label
-                        System.out.println("Predicted class: " + predictedClassName.toString());
+                        System.out.println("Predicted class: " + predictedClassName);
 
                         double[] classProbabilities = bayesNet.distributionForInstance(testInstance);
 
@@ -2735,6 +2739,8 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+
+
 
 
                     //////////////////////////////////////////////////////////////////
