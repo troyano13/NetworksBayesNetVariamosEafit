@@ -2652,15 +2652,13 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                 System.out.println("margin");
                 double[] P = m_BayesNet.getMargin(iNode);
                 System.out.println("--P-" + "___P__" + P);
+                double posteriorProbability = 1.0; // Inicializar la Posterior Probability
+
                 for (int iValue = 0; iValue < P.length; iValue++) {
                     System.out.println("iValue-->" + P[iValue] + "" + "iValue p-->" + P + "[iValue]--> " + iValue);
                     String sP = P[iValue] + "";
-
                     System.out.println("--sP%--" + sP + "%" + "----------ññññ");
 
-                    ////////////////////////////////////////////////
-
-                    System.out.println("recorriendo!!!");
                     try {
                         FastVector classValues = new FastVector();
                         classValues.addElement("Class1");
@@ -2679,7 +2677,6 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                         }
 
                         Instances instances = new Instances("SampleInstances", attributes, 1);
-
                         // Create instances and set values dynamically
                         for (int i = 0; i < probabilities.length; i++) {
                             Instance instance = new DenseInstance(attributes.size());
@@ -2694,75 +2691,61 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                                 Attribute attribute = (Attribute) attributes.elementAt(j);
                                 instance.setValue(attribute, posterior);
                             }
-
                             instances.add(instance);
                         }
-
                         // Set class index
                         instances.setClassIndex(0);
 
                         BayesNet bayesNet = new BayesNet();
                         bayesNet.buildClassifier(instances);
 
-                        // Create a new instance for testing
-                        Instance testInstance = new DenseInstance(attributes.size());
-                        testInstance.setDataset(instances);
+                        // Get the indices of the parent nodes for the current node
+                        BayesNet bayesNetModel = (BayesNet) m_BayesNet;
+                        int[] parentIndices = bayesNetModel.getParentSet(iNode).getParents();
 
-                        // Set values for the test instance dynamically
-                        for (int j = 0; j < probabilities[0].length; j++) {
-                            double posterior = probabilities[0][j];
-                            if (j >= attributes.size()) {
-                                System.err.println("Índice inválido: " + j);
-                                continue;
+                        // Calculate the product of parent margins
+                        double product = 1.0;
+                        for (int parentIndex : parentIndices) {
+                            double[] parentMarginals = m_BayesNet.getMargin(parentIndex);
+                            if (parentMarginals.length > 0) {
+                                product *= parentMarginals[0]; // Multiply by the first value of parentMarginals
                             }
-                            Attribute attribute = (Attribute) attributes.elementAt(j);
-                            testInstance.setValue(attribute, posterior);
                         }
 
-                        // Classify the test instance
-                        double predictedClass = bayesNet.classifyInstance(testInstance);
-
-                        // Get the class label for the predicted class value
-                        String predictedClassName = instances.classAttribute().value((int) predictedClass);
-
-                        // Print the predicted class label
-                        System.out.println("Predicted class: " + predictedClassName);
-
-                        double[] classProbabilities = bayesNet.distributionForInstance(testInstance);
-
-                        // Recorrer las probabilidades posteriores y mostrarlas
-                        for (int i = 0; i < classProbabilities.length; i++) {
-                            String className = instances.classAttribute().value(i);
-                            double classProbability = classProbabilities[i];
-                            System.out.println("Class: " + className + ", Probability: " + classProbability);
+                        // Multiply the product of parent margins by the first value of getMargin(iNode)
+                        if (P.length > 0 && iValue == 0) {
+                            posteriorProbability *= product * P[0];
                         }
+
+                        System.out.println("Posterior Probability: " + posteriorProbability);
+
+                        // Rest of the code...
+                        /////////////////////////////////////////////////////////////////////////////////
+
+                        if (sP.charAt(0) == '0') {
+                            sP = "0" + sP.substring(1) + "0";
+                            System.out.println("--sP%-->" + sP + "%");
+                        }
+                        if (sP.length() > 5) {
+                            sP = "0" + sP.substring(1, 5);
+                            System.out.println("0." + "--sP2%-->" + sP + "%");
+                        }
+                        g.fillRect(nPosX + m_nPaddedNodeWidth, nPosY + iValue * 10 + 2,
+                                (int) (P[iValue] * 100), 8);
+                        System.out.println("____________________________________________________>" + iNode);
+                        System.out.println("__________________________________________1" + P[iValue]);
+                        g.drawString(m_BayesNet.getNodeValue(iNode, iValue) + " " + sP + " ", nPosX
+                                + m_nPaddedNodeWidth + (int) (P[iValue] * 100), nPosY + iValue * 10
+                                + 10);
+                        System.out.println("__________________________________________2" + P[iValue]);
+
+                        // Remaining code...
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-
-
-
-
-                    //////////////////////////////////////////////////////////////////
-
-                    if (sP.charAt(0) == '0') {
-                        sP = "0" + sP.substring(1) + "0";
-                        System.out.println("--sP%-->" + sP + "%");
-
-
-                    }
-                    if (sP.length() > 5) {
-                        sP = "0" + sP.substring(1, 5);
-
-                        System.out.println("0." + "--sP2%-->" + sP + "%");
-                    }
-                    g.fillRect(nPosX + m_nPaddedNodeWidth, nPosY + iValue * 10 + 2,
-                            (int) (P[iValue] * 100), 8);
-
-                    g.drawString(m_BayesNet.getNodeValue(iNode, iValue) + " " + sP + " ", nPosX
-                            + m_nPaddedNodeWidth + (int) (P[iValue] * 100), nPosY + iValue * 10
-                            + 10);
                 }
+
+//////////////////////////////////////////////////////////
             }
             if (m_bViewCliques) {
                 return;
@@ -2879,6 +2862,98 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                 g.drawLine(nPosX2, nPosY2, nPosX3, nPosY3);
             }
         } // drawArrow
+
+        //posteriorProbability
+        public void posteriorProbability(int iNode) {
+
+            try {
+                String nodo= m_BayesNet.getNodeName(iNode);
+
+
+                FastVector classValues = new FastVector();
+                classValues.addElement("Class1");
+                classValues.addElement("Class2");
+                Attribute classAttribute = new Attribute("Class", classValues);
+
+                FastVector attributes = new FastVector();
+                attributes.addElement(classAttribute);
+
+                double[][] probabilities = m_BayesNet.getDistribution(iNode);
+
+                // Create and add attributes dynamically
+                for (int j = 0; j < probabilities[0].length; j++) {
+                    Attribute attribute = new Attribute("Node" + (j + 1));
+                    attributes.addElement(attribute);
+                }
+
+                Instances instances = new Instances("SampleInstances", attributes, 1);
+
+                // Create instances and set values dynamically
+                for (int i = 0; i < probabilities.length; i++) {
+                    Instance instance = new DenseInstance(attributes.size());
+                    instance.setDataset(instances);
+
+                    for (int j = 0; j < probabilities[i].length; j++) {
+                        double posterior = probabilities[i][j];
+                        if (j >= attributes.size()) {
+                            System.err.println("Índice inválido: " + j);
+                            continue;
+                        }
+                        Attribute attribute = (Attribute) attributes.elementAt(j);
+                        instance.setValue(attribute, posterior);
+                    }
+
+                    instances.add(instance);
+                }
+
+                // Set class index
+                instances.setClassIndex(0);
+
+                BayesNet bayesNet = new BayesNet();
+                bayesNet.buildClassifier(instances);
+
+                // Create a new instance for testing
+                Instance testInstance = new DenseInstance(attributes.size());
+                testInstance.setDataset(instances);
+
+                // Get the indices of the parent nodes for the current node
+                BayesNet bayesNetModel = (BayesNet) m_BayesNet;
+                int[] parentIndices = bayesNetModel.getParentSet(iNode).getParents();
+
+                // Set values for the test instance using parent instances
+                for (int parentIndex : parentIndices) {
+                    Instance parentInstance = instances.get(parentIndex);
+                    for (int j = 1; j < parentInstance.numAttributes(); j++) { // Exclude the class attribute
+                        double parentValue = parentInstance.value(j);
+                        Attribute parentAttribute = parentInstance.attribute(j);
+                        testInstance.setValue(parentAttribute, parentValue);
+                    }
+                }
+
+                // Classify the test instance
+                double predictedClass = bayesNet.classifyInstance(testInstance);
+
+                // Get the class label for the predicted class value
+                String predictedClassName = instances.classAttribute().value((int) predictedClass);
+
+                // Print the predicted class label
+                System.out.println("Predicted class: " + predictedClassName);
+
+                double[] classProbabilities = bayesNet.distributionForInstance(testInstance);
+
+                // Recorrer las probabilidades posteriores y mostrarlas
+                for (int i = 0; i < classProbabilities.length; i++) {
+                    String className = instances.classAttribute().value(i);
+                    double classProbability = classProbabilities[i];
+                    System.out.println("Class: " + className + ", Probability: " + classProbability);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+        }
+        //posteriorProbability
 
         /**
          * This method highlights a given node and all its incoming and outgoing
