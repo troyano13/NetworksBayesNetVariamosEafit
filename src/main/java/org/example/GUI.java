@@ -2652,20 +2652,20 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                     String sP = P[iValue] + "";
                     System.out.println("--sP%--" + sP + "%");
 
-                   //  printMarginWithNoParents(iNode, iValue);
-                    System.out.println("el nodo es::::::::::::INICIA:::::::::::::::"+ m_BayesNet.getNodeName(iNode));
-                    double[] sPP = printMarginWithNoParents(iNode, iValue) ;
-                    System.out.println("el nodo es:::::::::::TERMINA::::::::::::::::"+ m_BayesNet.getNodeName(iNode)+ "::::IVALUE:::"+ iValue);
+                    //  printMarginWithNoParents(iNode, iValue);
+                    System.out.println("el nodo es::::::::::::INICIA:::::::::::::::" + m_BayesNet.getNodeName(iNode));
+                    double[] sPP = printMarginWithNoParents(iNode, iValue);
+                    System.out.println("el nodo es:::::::::::TERMINA::::::::::::::::" + m_BayesNet.getNodeName(iNode) + "::::IVALUE:::" + iValue);
 ////////////////////////77
 
                     g.fillRect(nPosX + m_nPaddedNodeWidth, nPosY + iValue * 10 + 2,
                             (int) (P[iValue] * 100), 8);
-                    System.out.println("____________________________________________________>" +"value "+iValue + "node "+iNode + "name"+m_BayesNet.getNodeName(iNode));
+                    System.out.println("____________________________________________________>" + "value " + iValue + "node " + iNode + "name" + m_BayesNet.getNodeName(iNode));
 
-                    g.drawString(m_BayesNet.getNodeValue(iNode, iValue) + " " + sP + " " + "   Prob  " + sPP[iValue]+"%", nPosX
+                    g.drawString(m_BayesNet.getNodeValue(iNode, iValue) + " " + sP + " " + "   Prob  " + sPP[iValue] + "%", nPosX
                             + m_nPaddedNodeWidth + (int) (P[iValue] * 100), nPosY + iValue * 10
                             + 10);
-                    System.out.println("___________________________________Posterior Probability: "+sPP[iValue]+ "%");
+                    System.out.println("___________________________________Posterior Probability: " + sPP[iValue] + "%");
 
 //////////***********************************************////////////////////////////
 
@@ -2732,41 +2732,34 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
 ///////////////////////////////////////
         private double[] getMargin(int iNode, int iValue) {
+            double[] pFinal = new double[0];
             System.out.println("in getMargin");
             // Implementación de la función getMargin()
-            double[] P = m_BayesNet.getMargin(iNode);
-            double PosteriorFinal = P[iValue] * 100;
-            System.out.println("3 getMargin");
+            double[] marginP = m_BayesNet.getMargin(iNode);
+            double result = 1.0; // Inicializar con 1 para la multiplicación
 
-            String PosteriorFinalPorce = String.valueOf(PosteriorFinal);
-            System.out.println("4 getMargin");
-/*
-            g.fillRect(nPosX + m_nPaddedNodeWidth, nPosY + iValue * 10 + 2,
-                    (int) (P[iValue] * 100), 8);
-            System.out.println("____________________________________________________>" + iNode);
+            for (double value : marginP) {
+                result *= value;
+                pFinal = marginP;
+            }
+            System.out.println("El resultado de la multiplicación es: " + result);
 
-            g.drawString(m_BayesNet.getNodeValue(iNode, iValue) + " " + sP + " " + "   Prob  " + PosteriorFinalPorce.substring(0, 4) + "%", nPosX
-                    + m_nPaddedNodeWidth + (int) (P[iValue] * 100), nPosY + iValue * 10
-                    + 10);
-            System.out.println("___________________________________Posterior Probability: " + PosteriorFinalPorce.substring(0, 4) + "%");
-*/
             // Retorna un arreglo con las probabilidades del nodo iNode
-            System.out.println("_______________________________________________-Posterior Probability1: " + PosteriorFinalPorce);
-            System.out.println("___return P_" + P);
-            return P ;
+            System.out.println("_______________________________________________-Posterior Probability1: " + result);
+
+            return pFinal;
         }
 
         private boolean hasNoParents(int iNode) {
             // Implementación de la función hasParents()
-            System.out.println("has parents node ---->"+ iNode);
+            System.out.println("has parents node ---->" + iNode);
             ParentSet parentSet = m_BayesNet.getParentSet(iNode);
-            System.out.println("m_BayesNet.getParentSet(iNode)..node"+ iNode);
+            System.out.println("m_BayesNet.getParentSet(iNode)..node" + iNode);
             int[] nrOfParents = new int[]{parentSet.getNrOfParents()};
-            System.out.println("int[] nrOfParents = new int[]{parentSet.getNrOfParents()}node"+ iNode);
-// adicionar if (nrOfParents==0) {}
+            System.out.println("int[] nrOfParents = new int[]{parentSet.getNrOfParents()}node" + iNode);
 
             for (int nrOfparent : nrOfParents) {
-                System.out.println("for paren--nrOfParents-->"+ nrOfparent);
+                System.out.println("for paren--nrOfParents-->" + nrOfparent);
                 int parent = nrOfparent;
                 // Retorna true si el nodo iNode tiene padres, false en caso contrario
                 if (parent != 0) {
@@ -2786,7 +2779,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
             // Implementación de la función getParentSet()
             int[] parentIndices = new int[0];
             try {
-                System.out.println("______get parets de :"+ iNodeP +"poster->"+ PosteriorFinal);
+                System.out.println("______get parets de node :" + iNodeP + "poster->" + PosteriorFinal);
                 FastVector classValues = new FastVector();
                 classValues.addElement("Class1");
                 classValues.addElement("Class2");
@@ -2841,28 +2834,6 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                     }
                 }
 
-                // Multiply the product of parent margins by the corresponding value of P
-                double posteriorProbability = product * PosteriorFinal;
-                System.out.println("Posterior: " + posteriorProbability+ "---"+ product + "---"+PosteriorFinal);
-                // Calcular la raíz cuadrada de posteriorProbability
-                double raizCuadrada = Math.sqrt(posteriorProbability);
-
-                double PosteriorFinal2 = raizCuadrada * 100;
-
-                String PosteriorFinalPorce = String.valueOf(PosteriorFinal2);
-
-
-                System.out.println("_______________________________________________-Posterior Probability2: " + PosteriorFinalPorce);
-
-/*
-                    g.fillRect(nPosX + m_nPaddedNodeWidth, nPosY + iValue * 10 + 2,
-                            (int) (P[iValue] * 100), 8);
-                    System.out.println("____________________________________________________>" + iNode);
-                    g.drawString(m_BayesNet.getNodeValue(iNode, iValue) + " " + sP + " " + "   Prob  " + PosteriorFinalPorce.substring(0, 4) + "%", nPosX
-                            + m_nPaddedNodeWidth + (int) (P[iValue] * 100), nPosY + iValue * 10
-                            + 10);
-*/
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -2874,20 +2845,20 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
             double[] pFinal = new double[0];
             if (!hasNoParents(iNodeP)) {
-                System.out.println("print Margint--> node"+ iNodeP);
+                System.out.println("print Margint--> node" + iNodeP);
                 // Si el nodo no tiene padres, imprimir su getMargin()
                 double[] margin = getMargin(iNodeP, iValue);
                 for (double value : margin) {
-                    System.out.println(value+ "!has Nopadres-> "+iNodeP +" -- "+ iValue);
-                    pFinal=margin;
+                    System.out.println(value + "!has Nopadres-> " + iNodeP + " -- " + iValue);
+                    pFinal = margin;
                 }
             } else {
-                System.out.println("Si tiene parents -voy parent set->" +iNodeP+ "iVa"+iValue);
+                System.out.println("Si tiene parents -voy parent set->" + iNodeP + "iVa" + iValue);
                 // Si el nodo tiene padres, buscar el padre más lejano que no tenga padres
                 int[] parentSet = getParentSet(iNodeP, iValue);
-                System.out.println(" getParentSet  de:"+ iNodeP +"ivalue"+ iValue);
+                System.out.println(" getParentSet  de:" + iNodeP + "ivalue" + iValue);
                 boolean hasNoParents = true;
-                System.out.println("hasNoParents = true + más " + getParentSet(iNodeP, iValue) +"+"+ iNodeP+"::" +iValue);
+                System.out.println("hasNoParents = true + más " + getParentSet(iNodeP, iValue) + "+" + iNodeP + "::" + iValue);
                 for (int parentIndex : parentSet) {
                     System.out.println("debug stop");
                     if (hasNoParents(parentIndex)) {
@@ -2903,8 +2874,8 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                     double[] margin = getMargin(iNodeP, iValue);
                     System.out.println("----.");
                     for (double value : margin) {
-                        System.out.println("hasNoParents--->"+value);
-                        pFinal=margin;
+                        System.out.println("hasNoParents--->" + value);
+                        pFinal = margin;
                     }
                 }
                 if (!hasNoParents) {
@@ -2914,13 +2885,9 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
                     for (double value : marginP) {
                         result *= value;
-                        pFinal=marginP;
+                        pFinal = marginP;
                     }
                     System.out.println("El resultado de la multiplicación es: " + result);
-
-                    System.out.println("nuevo2!");
-
-
                 }
             }
             return pFinal;
