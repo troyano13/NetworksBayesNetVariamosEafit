@@ -2652,130 +2652,24 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                     String sP = P[iValue] + "";
                     System.out.println("--sP%--" + sP + "%");
 
-                    if (sP.charAt(0) == '0') {
-                        sP = "0" + sP.substring(1) + "0";
-                        System.out.println("--sP%-->" + sP + "%");
-                    }
-                    if (sP.length() > 5) {
-                        sP = "0" + sP.substring(1, 5);
-                        System.out.println("0." + "--sP2%-->" + sP + "%");
-                    }
+                   //  printMarginWithNoParents(iNode, iValue);
+                    System.out.println("el nodo es::::::::::::INICIA:::::::::::::::"+ m_BayesNet.getNodeName(iNode));
+                    double[] sPP = printMarginWithNoParents(iNode, iValue) ;
+                    System.out.println("el nodo es:::::::::::TERMINA::::::::::::::::"+ m_BayesNet.getNodeName(iNode)+ "::::IVALUE:::"+ iValue);
+////////////////////////77
 
-                    // Obtener el conjunto de padres del nodo iNode
-                    ParentSet parentSet = m_BayesNet.getParentSet(iNode);
+                    g.fillRect(nPosX + m_nPaddedNodeWidth, nPosY + iValue * 10 + 2,
+                            (int) (P[iValue] * 100), 8);
+                    System.out.println("____________________________________________________>" +"value "+iValue + "node "+iNode + "name"+m_BayesNet.getNodeName(iNode));
 
-                    int[] nrOfParents = new int[]{parentSet.getNrOfParents()};
+                    g.drawString(m_BayesNet.getNodeValue(iNode, iValue) + " " + sP + " " + "   Prob  " + sPP[iValue]+"%", nPosX
+                            + m_nPaddedNodeWidth + (int) (P[iValue] * 100), nPosY + iValue * 10
+                            + 10);
+                    System.out.println("___________________________________Posterior Probability: "+sPP[iValue]+ "%");
 
-                    for (int nrOfparent : nrOfParents) {
-
-                        int parent = nrOfparent;
-
-                        if (parent == 0) {
-                            // El nodo no tiene padres
-                            double PosteriorFinal =P[iValue] * 100;
-
-                            String PosteriorFinalPorce = String.valueOf(PosteriorFinal);
-
-                            g.fillRect(nPosX + m_nPaddedNodeWidth, nPosY + iValue * 10 + 2,
-                                    (int) (P[iValue] * 100), 8);
-                            System.out.println("____________________________________________________>" +iNode);
-
-                            g.drawString(m_BayesNet.getNodeValue(iNode, iValue) + " " + sP + " "+ "   Prob  "+PosteriorFinalPorce.substring(0,4) +"%", nPosX
-                                    + m_nPaddedNodeWidth + (int) (P[iValue] * 100), nPosY + iValue * 10
-                                    + 10);
-                            System.out.println("___________________________________Posterior Probability: " + PosteriorFinalPorce.substring(0,4) +"%");
-
-                        } else
-                            try {
-                                FastVector classValues = new FastVector();
-                                classValues.addElement("Class1");
-                                classValues.addElement("Class2");
-                                Attribute classAttribute = new Attribute("Class", classValues);
-
-                                FastVector attributes = new FastVector();
-                                attributes.addElement(classAttribute);
-
-                                double[][] probabilities = m_BayesNet.getDistribution(iNode);
-
-                                // Create and add attributes dynamically
-                                for (int j = 0; j < probabilities[0].length; j++) {
-                                    Attribute attribute = new Attribute("Node" + (j + 1));
-                                    attributes.addElement(attribute);
-                                }
-
-                                Instances instances = new Instances("SampleInstances", attributes, 1);
-                                // Create instances and set values dynamically
-                                for (int i = 0; i < probabilities.length; i++) {
-                                    Instance instance = new DenseInstance(attributes.size());
-                                    instance.setDataset(instances);
-
-                                    for (int j = 0; j < probabilities[i].length; j++) {
-                                        double posterior = probabilities[i][j];
-                                        if (j >= attributes.size()) {
-                                            System.err.println("Índice inválido: " + j);
-                                            continue;
-                                        }
-                                        Attribute attribute = (Attribute) attributes.elementAt(j);
-                                        instance.setValue(attribute, posterior);
-                                    }
-                                    instances.add(instance);
-                                }
-                                // Set class index
-                                instances.setClassIndex(0);
-
-                                BayesNet bayesNet = new BayesNet();
-                                bayesNet.buildClassifier(instances);
-
-                                // Get the indices of the parent nodes for the current node
-                                BayesNet bayesNetModel = (BayesNet) m_BayesNet;
-                                int[] parentIndices = bayesNetModel.getParentSet(iNode).getParents();
-
-                                // Calculate the product of parent margins
-                                double product = 1.0;
-                                if (parentIndices.length > 0) {
-                                    for (int parentIndex : parentIndices) {
-                                        double[] parentMarginals = m_BayesNet.getMargin(parentIndex);
-                                        if (parentMarginals.length > 0) {
-                                            product *= parentMarginals[0]; // Multiply by the first value of parentMarginals
-                                        }
-                                    }
-                                }
-
-
-                                // Multiply the product of parent margins by the corresponding value of P
-                                double posteriorProbability = product * P[iValue];
-                                System.out.println("Posterior: " + posteriorProbability);
-                                // Calcular la raíz cuadrada de posteriorProbability
-                                double raizCuadrada = Math.sqrt(posteriorProbability);
-
-                                double PosteriorFinal =raizCuadrada * 100;
-
-                                String PosteriorFinalPorce = String.valueOf(PosteriorFinal);
-
-
-
-                                System.out.println("_______________________________________________-Posterior Probability: " +PosteriorFinalPorce );
-
-
-                                g.fillRect(nPosX + m_nPaddedNodeWidth, nPosY + iValue * 10 + 2,
-                                        (int) (P[iValue] * 100), 8);
-                                System.out.println("____________________________________________________>" + iNode);
-                                 g.drawString(m_BayesNet.getNodeValue(iNode, iValue) + " " + sP + " "+ "   Prob  "+ PosteriorFinalPorce.substring(0,4)+"%", nPosX
-                                        + m_nPaddedNodeWidth + (int) (P[iValue] * 100), nPosY + iValue * 10
-                                        + 10);
-
-
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                    }
-
-
-                    ///
-
+//////////***********************************************////////////////////////////
 
                 }
-
 
 //////////////////////////////////////////////////////////
             }
@@ -2833,11 +2727,213 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
         } // drawNode
 
         /**
+         * This method is to found probabilities.
+         */
+
+///////////////////////////////////////
+        private double[] getMargin(int iNode, int iValue) {
+            System.out.println("in getMargin");
+            // Implementación de la función getMargin()
+            double[] P = m_BayesNet.getMargin(iNode);
+            double PosteriorFinal = P[iValue] * 100;
+            System.out.println("3 getMargin");
+
+            String PosteriorFinalPorce = String.valueOf(PosteriorFinal);
+            System.out.println("4 getMargin");
+/*
+            g.fillRect(nPosX + m_nPaddedNodeWidth, nPosY + iValue * 10 + 2,
+                    (int) (P[iValue] * 100), 8);
+            System.out.println("____________________________________________________>" + iNode);
+
+            g.drawString(m_BayesNet.getNodeValue(iNode, iValue) + " " + sP + " " + "   Prob  " + PosteriorFinalPorce.substring(0, 4) + "%", nPosX
+                    + m_nPaddedNodeWidth + (int) (P[iValue] * 100), nPosY + iValue * 10
+                    + 10);
+            System.out.println("___________________________________Posterior Probability: " + PosteriorFinalPorce.substring(0, 4) + "%");
+*/
+            // Retorna un arreglo con las probabilidades del nodo iNode
+            System.out.println("_______________________________________________-Posterior Probability1: " + PosteriorFinalPorce);
+            System.out.println("___return P_" + P);
+            return P ;
+        }
+
+        private boolean hasNoParents(int iNode) {
+            // Implementación de la función hasParents()
+            System.out.println("has parents node ---->"+ iNode);
+            ParentSet parentSet = m_BayesNet.getParentSet(iNode);
+            System.out.println("m_BayesNet.getParentSet(iNode)..node"+ iNode);
+            int[] nrOfParents = new int[]{parentSet.getNrOfParents()};
+            System.out.println("int[] nrOfParents = new int[]{parentSet.getNrOfParents()}node"+ iNode);
+// adicionar if (nrOfParents==0) {}
+
+            for (int nrOfparent : nrOfParents) {
+                System.out.println("for paren--nrOfParents-->"+ nrOfparent);
+                int parent = nrOfparent;
+                // Retorna true si el nodo iNode tiene padres, false en caso contrario
+                if (parent != 0) {
+                    // El nodo no tiene padres
+                    System.out.println("falso");
+                    return true;
+
+                }
+
+            }
+            System.out.println("true---> sale!! con falso");
+            return false;
+        }
+
+        private int[] getParentSet(int iNodeP, double PosteriorFinal) {
+
+            // Implementación de la función getParentSet()
+            int[] parentIndices = new int[0];
+            try {
+                System.out.println("______get parets de :"+ iNodeP +"poster->"+ PosteriorFinal);
+                FastVector classValues = new FastVector();
+                classValues.addElement("Class1");
+                classValues.addElement("Class2");
+                Attribute classAttribute = new Attribute("Class", classValues);
+
+                FastVector attributes = new FastVector();
+                attributes.addElement(classAttribute);
+
+                double[][] probabilities = m_BayesNet.getDistribution(iNodeP);
+
+                // Create and add attributes dynamically
+                for (int j = 0; j < probabilities[0].length; j++) {
+                    Attribute attribute = new Attribute("Node" + (j + 1));
+                    attributes.addElement(attribute);
+                }
+
+                Instances instances = new Instances("SampleInstances", attributes, 1);
+                // Create instances and set values dynamically
+                for (int i = 0; i < probabilities.length; i++) {
+                    Instance instance = new DenseInstance(attributes.size());
+                    instance.setDataset(instances);
+
+                    for (int j = 0; j < probabilities[i].length; j++) {
+                        double posterior = probabilities[i][j];
+                        if (j >= attributes.size()) {
+                            System.err.println("Índice inválido: " + j);
+                            continue;
+                        }
+                        Attribute attribute = (Attribute) attributes.elementAt(j);
+                        instance.setValue(attribute, posterior);
+                    }
+                    instances.add(instance);
+                }
+                // Set class index
+                instances.setClassIndex(0);
+
+                BayesNet bayesNet = new BayesNet();
+                bayesNet.buildClassifier(instances);
+
+                // Get the indices of the parent nodes for the current node
+                BayesNet bayesNetModel = (BayesNet) m_BayesNet;
+                parentIndices = bayesNetModel.getParentSet(iNodeP).getParents();
+
+                // Calculate the product of parent margins
+                double product = 1.0;
+                if (parentIndices.length > 0) {
+                    for (int parentIndex : parentIndices) {
+                        double[] parentMarginals = m_BayesNet.getMargin(parentIndex);
+                        if (parentMarginals.length > 0) {
+                            product *= parentMarginals[0]; // Multiply by the first value of parentMarginals
+                        }
+                    }
+                }
+
+                // Multiply the product of parent margins by the corresponding value of P
+                double posteriorProbability = product * PosteriorFinal;
+                System.out.println("Posterior: " + posteriorProbability+ "---"+ product + "---"+PosteriorFinal);
+                // Calcular la raíz cuadrada de posteriorProbability
+                double raizCuadrada = Math.sqrt(posteriorProbability);
+
+                double PosteriorFinal2 = raizCuadrada * 100;
+
+                String PosteriorFinalPorce = String.valueOf(PosteriorFinal2);
+
+
+                System.out.println("_______________________________________________-Posterior Probability2: " + PosteriorFinalPorce);
+
+/*
+                    g.fillRect(nPosX + m_nPaddedNodeWidth, nPosY + iValue * 10 + 2,
+                            (int) (P[iValue] * 100), 8);
+                    System.out.println("____________________________________________________>" + iNode);
+                    g.drawString(m_BayesNet.getNodeValue(iNode, iValue) + " " + sP + " " + "   Prob  " + PosteriorFinalPorce.substring(0, 4) + "%", nPosX
+                            + m_nPaddedNodeWidth + (int) (P[iValue] * 100), nPosY + iValue * 10
+                            + 10);
+*/
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            // Retorna un arreglo con los índices de los padres del nodo iNode
+            return parentIndices;
+        }
+
+        private double[] printMarginWithNoParents(int iNodeP, int iValue) {
+
+            double[] pFinal = new double[0];
+            if (!hasNoParents(iNodeP)) {
+                System.out.println("print Margint--> node"+ iNodeP);
+                // Si el nodo no tiene padres, imprimir su getMargin()
+                double[] margin = getMargin(iNodeP, iValue);
+                for (double value : margin) {
+                    System.out.println(value+ "!has Nopadres-> "+iNodeP +" -- "+ iValue);
+                    pFinal=margin;
+                }
+            } else {
+                System.out.println("Si tiene parents -voy parent set->" +iNodeP+ "iVa"+iValue);
+                // Si el nodo tiene padres, buscar el padre más lejano que no tenga padres
+                int[] parentSet = getParentSet(iNodeP, iValue);
+                System.out.println(" getParentSet  de:"+ iNodeP +"ivalue"+ iValue);
+                boolean hasNoParents = true;
+                System.out.println("hasNoParents = true + más " + getParentSet(iNodeP, iValue) +"+"+ iNodeP+"::" +iValue);
+                for (int parentIndex : parentSet) {
+                    System.out.println("debug stop");
+                    if (hasNoParents(parentIndex)) {
+                        System.out.println(" hasNoParents va a hasNode con false");
+                        hasNoParents = false;
+                        System.out.println("recursivo PrintMargin again!" + parentIndex + iValue);
+                        printMarginWithNoParents(parentIndex, iValue);
+                        System.out.println("----");
+                    }
+                }
+                if (hasNoParents) {
+                    System.out.println("hasNoParents--->");
+                    double[] margin = getMargin(iNodeP, iValue);
+                    System.out.println("----.");
+                    for (double value : margin) {
+                        System.out.println("hasNoParents--->"+value);
+                        pFinal=margin;
+                    }
+                }
+                if (!hasNoParents) {
+                    System.out.println("nuevo!");
+                    double[] marginP = m_BayesNet.getMargin(iNodeP);
+                    double result = 1.0; // Inicializar con 1 para la multiplicación
+
+                    for (double value : marginP) {
+                        result *= value;
+                        pFinal=marginP;
+                    }
+                    System.out.println("El resultado de la multiplicación es: " + result);
+
+                    System.out.println("nuevo2!");
+
+
+                }
+            }
+            return pFinal;
+        }
+        ////////////////////////////////
+
+        /**
          * This method draws an arrow on a line from (x1,y1) to (x2,y2). The arrow
          * head is seated on (x2,y2) and is in the direction of the line. If the
          * arrow is needed to be drawn in the opposite direction then simply swap
          * the order of (x1, y1) and (x2, y2) when calling this function.
          */
+
         protected void drawArrow(Graphics g, int nPosX1, int nPosY1, int nPosX2,
                                  int nPosY2) {
             g.drawLine(nPosX1, nPosY1, nPosX2, nPosY2);
@@ -2893,14 +2989,14 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                 }
                 g.drawLine(nPosX2, nPosY2, nPosX3, nPosY3);
             }
-        } // drawArrow
+        }
+        // drawArrow
 
         //posteriorProbability
         public void posteriorProbability(int iNode) {
 
             try {
                 String nodo = m_BayesNet.getNodeName(iNode);
-
 
                 FastVector classValues = new FastVector();
                 classValues.addElement("Class1");
@@ -2961,18 +3057,13 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                         testInstance.setValue(parentAttribute, parentValue);
                     }
                 }
-
                 // Classify the test instance
                 double predictedClass = bayesNet.classifyInstance(testInstance);
-
                 // Get the class label for the predicted class value
                 String predictedClassName = instances.classAttribute().value((int) predictedClass);
-
                 // Print the predicted class label
                 System.out.println("Predicted class: " + predictedClassName);
-
                 double[] classProbabilities = bayesNet.distributionForInstance(testInstance);
-
                 // Recorrer las probabilidades posteriores y mostrarlas
                 for (int i = 0; i < classProbabilities.length; i++) {
                     String className = instances.classAttribute().value(i);
