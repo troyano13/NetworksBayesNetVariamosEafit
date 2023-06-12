@@ -2658,7 +2658,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                     g.fillRect(nPosX + m_nPaddedNodeWidth, nPosY + iValue * 10 + 2,
                             (int) (P[iValue] * 100), 8);
 
-                    g.drawString(m_BayesNet.getNodeValue(iNode, iValue) + " " + sP + " " + "   Prob  " + sPP[iValue] + "%", nPosX
+                    g.drawString(m_BayesNet.getNodeValue(iNode, iValue) + " " + sP + " " + "   Prob  " + sPP[iValue] *100 + "%", nPosX
                             + m_nPaddedNodeWidth + (int) (P[iValue] * 100), nPosY + iValue * 10
                             + 10);
 
