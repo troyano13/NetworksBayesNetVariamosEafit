@@ -12,9 +12,6 @@ import org.xml.sax.SAXException;
 import weka.classifiers.bayes.net.BIFReader;
 import weka.classifiers.bayes.net.BayesNetGenerator;
 import weka.classifiers.bayes.net.EditableBayesNet;
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instances;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -32,14 +29,9 @@ public class JsonReader {
 
     public static void main(String[] args) throws Exception {
         String tmpfilename = "src/resources/TresNdWeka.xml";
-        toRedJsonFeature();
-        // toRedXMLFeature3();
-        // createEditableBayesNet(toRedXMLFeature3());
-        //__  createInstancesFromXML(tmpfilename);
-        //posterioPro();
-        XMLBIFLoader.loadInstancesFromXML(tmpfilename);
-        // posterioREad();
-
+        //toRedJsonFeature();
+        //toRedXMLFeature();
+        createEditableBayesNet(toRedXMLFeature());
 
     }
 
@@ -345,280 +337,18 @@ public class JsonReader {
 
                 System.out.println("creacion arcos" + feature.getTarget());
                 m_BayesNet.addArc(feature.getTarget(), feature.getSource());
-//
-              /*  System.out.println("DATOS NODO" + feature.getTarget());
-                ArrayList<Integer> arrayList = new ArrayList<Integer>();
-                arrayList = m_BayesNet.getChildren(Integer.parseInt(feature.getTarget()));
-                // Crear una instancia de BayesNet (m_BayesNet)
-                BayesNet m_BayesNete = m_BayesNet;
-// Obtener el número total de nodos en el modelo Bayesiano
-                int totalNodes = m_BayesNete.getNrOfNodes();
-// Recorrer cada nodo para verificar si tiene hijos
-                for (int node = 0; node < totalNodes; node++) {
-                    // Obtener los padres del nodo actual
-                    int[] parents = m_BayesNete.getParentSet(node).getParents();
-                  //  System.out.println("parents va: " + parents);
 
-                    for (int i = 0; i < parents.length; i++) {
-
-                      //  System.out.println("parents"+ parents +i);
-                    }
-                    // Verificar si el nodo actual no tiene hijos
-                    if (m_BayesNet.getChildren(node).size() == 0) {
-                        System.out.println("Nodo sin hijos: " + node);
-                    }
-                }
-                for (int i = 0; i < arrayList.size(); i++) {
-                    int elemento = arrayList.get(i);
-                    System.out.println(elemento + "oe!!");
-                }*/
-
-                //
                 System.out.println("CPT");
 
-                /*
-                double[][] matrize = m_BayesNet.getDistribution(feature.getTarget());
-
-                for (int i = 0; i < matrize.length; i++) {
-
-                    for (int j = 0; j < matrize[i].length; j++) {
-                        if (i == 0) {
-
-                             double[][] distribution = {
-                                    {0.2, 0.8},   // Probabilidades condicionales para A = 0
-                                    {0.6, 0.4}    // Probabilidades condicionales para A = 1
-                            };
-                        }
-                        matrize[i][j]=1.5;
-                        System.out.print(matrize[i][j] + " ");
-                        m_BayesNet.setDistribution(feature.getTarget(), matrize);
-
-                    }
-                    m_BayesNet.setDistribution(feature.getTarget(), matrize);
-                    System.out.println("-------");
-                }
-
-*/
-//
-                System.out.println("----inicio---");
-                final double[][] m_fProbs;
-                System.out.println("----2---");
-                double[][] probs = m_BayesNet.getDistribution(feature.getTarget());
-                System.out.println("---get----");
-                m_fProbs = new double[probs.length][probs[0].length];
-                System.out.println("---3----");
-                for (int i = 0; i < probs.length; i++) {
-                    System.out.println("---f1----");
-                    for (int j = 0; j < probs[0].length; j++) {
-                        System.out.println("---f2----");
-                        System.out.println("1-------->" + m_fProbs[i][j]);
-                        probs[i][j] = 0.1;
-                        m_fProbs[i][j] = probs[i][j];
-                        m_BayesNet.setDistribution(feature.getTarget(), m_fProbs);
-
-                        System.out.println("2-------->" + m_fProbs[i][j]);
-                        probs[i][j] = 0.1;
-                        m_fProbs[i][j] = probs[i][j];
-                        System.out.println("settt");
-                        m_BayesNet.setDistribution(feature.getTarget(), m_fProbs);
-                        System.out.println("postsettt");
-                    }
-                }
-
-                //
             } else {
                 break; // Finaliza el bucle cuando se encuentra un nodo nulo
             }
 
         }
 
-
         outfile.write(m_BayesNet.toXMLBIF03());
         System.out.println("Documento XML creado correctamente.");
         outfile.close();
     }
 
-    public static Instances createInstancesFromXML(String xmlFilePath) {
-
-
-        try {
-            // Crear un objeto DocumentBuilder para procesar el archivo XML
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            System.out.println("1");
-            // Leer el archivo XML y convertirlo en un objeto Document
-            Document doc = builder.parse(xmlFilePath);
-
-            // Obtener el elemento raíz del documento XML
-            Element root = doc.getDocumentElement();
-            System.out.println("2");
-            // Crear los atributos para las instancias
-            FastVector attributes = new FastVector();
-
-
-            // Recorrer los nodos de variables
-            NodeList variableNodes = root.getElementsByTagName("VARIABLE");
-            for (int i = 0; i < variableNodes.getLength(); i++) {
-                Element variable = (Element) variableNodes.item(i);
-                System.out.println("3");
-                // Obtener el nombre de la variable
-                String variableName = variable.getAttribute("NAME");
-
-                // Obtener los posibles valores de la variable
-                NodeList valueNodes = variable.getElementsByTagName("OUTCOME");
-                FastVector attributeValues = new FastVector(valueNodes.getLength());
-                for (int j = 0; j < valueNodes.getLength(); j++) {
-                    Element value = (Element) valueNodes.item(j);
-                    String valueName = value.getAttribute("NAME");
-                    attributeValues.addElement(valueName);
-                    System.out.println("posibles valores" + valueNodes.item(j));
-                }
-                System.out.println("4");
-                // Crear el atributo y agregarlo a la lista de atributos
-                Attribute attribute = new Attribute(variableName, attributeValues);
-                System.out.println("4.5");
-                attributes.addElement(attribute);
-            }
-
-            // Crear el objeto Instances con los atributos
-            Instances instances = new Instances("BayesNetInstances", attributes, 0);
-
-            // Recorrer los nodos de datos y agregar instancias
-            NodeList dataNodes = root.getElementsByTagName("DEFINITION");
-            for (int i = 0; i < dataNodes.getLength(); i++) {
-                Element data = (Element) dataNodes.item(i);
-                System.out.println("5" + dataNodes.item(i));
-                // Crear una nueva instancia
-                //Instance instance = new Instance(attributes.size());
-
-                // Obtener los valores de los atributos para la instancia
-                NodeList valueNodes = data.getElementsByTagName("VALUE");
-                for (int j = 0; j < valueNodes.getLength(); j++) {
-                    Element value = (Element) valueNodes.item(j);
-                    int attributeIndex = j;
-                    int attributeValueIndex = attributeIndex;
-                    System.out.println("6");
-                    // Establecer el valor del atributo
-                }
-                System.out.println("7");
-            }
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (SAXException e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println("instancia generadas");
-        return null;
-    }
-
-
-    public static void posterioREad() throws Exception {
-        System.out.println("a1");
-
-        String tmpfilename = "src/resources/TresNdWeka.xml";
-        System.out.println("a3");
-
-//        Instances instances = new Instances(new FileReader(tmpfilename));
-
-        // Crear un objeto EditableBayesNet
-        ;
-        Instances m_Instances = null;
-        EditableBayesNet m_BayesNet = new EditableBayesNet(true);
-
-        m_BayesNet.buildClassifier(m_Instances);
-
-        System.out.println("HOLIS");
-        double[][] posteriorProbabilities = m_BayesNet.distributionsForInstances(m_Instances);
-        // Imprimir las probabilidades posteriores
-        for (int i = 0; i < posteriorProbabilities.length; i++) {
-            System.out.println("Probabilidad posterior para la clase " + i + ": " + posteriorProbabilities[i]);
-        }
-        m_BayesNet.clearUndoStack();
-
-
-        // Ruta del archivo XML
-
-
-// Cargar el archivo XML en un objeto EditableBayesNet
-      /*  BIFLoader loader = new BIFLoader();
-        loader.setSource(new DataSource(tmpfilename));
-        EditableBayesNet bayesNet = loader.getBayesNet();
-
-        // Agregar nodos y definir la estructura del grafo en m_BayesNet
-
-        // Convertir a BayesNet
-        BayesNet bayesNet = new BayesNet();
-
-        bayesNet=m_BayesNet;
-*/
-        // Generar instancias a partir de BayesNet
-        BayesNetGenerator generator = new BayesNetGenerator();
-        // Instances instances = generator.set
-        //generator.setData();
-        // generator.setBayesNet(bayesNet);
-
-
-        // Imprimir las instancias
-        // System.out.println(instances);
-
-        System.out.println("a4");
-        //m_BayesNet = new EditableBayesNet(instances);
-        System.out.println("a5");
-/*
-       // double[] posteriorProbabilities = m_BayesNet.distributionForInstance(instances);
-        System.out.println("a6");
-        double[][] posteriorProbabilities = m_BayesNet.distributionsForInstances(instances);
-        System.out.println("a7");
-// Imprimir las probabilidades posteriores
-        for (int i = 0; i < posteriorProbabilities.length; i++) {
-
-            System.out.println("Probabilidad posterior para la clase " + i + ": " + posteriorProbabilities[i]);
-        }
-*/
-
-    }
-    /*
-    public static void posterioPro() throws Exception {
-        System.out.println("1");
-        // Crear una instancia de BayesNet
-        BayesNet m_BayesNet = new BayesNet();
-        System.out.println("2");
-// Cargar el modelo de la red bayesiana desde un archivo, si es necesario
-        //  m_BayesNet = (BayesNet) SerializationHelper.read("src/resources/library3.xml");
-        System.out.println("3");
-// Crear una instancia de tipo Instances para representar los datos
-        Instances m_Instances = null;
-        System.out.println("4");
-        String sFileName = "src/resources/library3.xml";
-        System.out.println("5");
-        Instances instances = new Instances(new FileReader(sFileName));
-        System.out.println("6");
-        Instances ale = new Instances(new FileReader(sFileName));
-        System.out.println("7");
-        m_BayesNet = new EditableBayesNet(instances);
-        System.out.println("8");
-        m_Instances = instances;
-        String archivoXML = "ruta_del_archivo.xml";
-
-
-        System.out.println("9");
-// Establecer los valores observados (evidencia) en la instancia de datos
-        Instance instance = new DenseInstance(12);
-        System.out.println("10");
-        instance.setDataset(ale);
-        //instance.setValue(attributeIndex, value);  // Establecer el valor para cada atributo en la instancia
-        System.out.println("11");
-// Calcular la probabilidad posterior
-        double[] posteriorProbabilities = m_BayesNet.distributionForInstance(instance);
-        System.out.println("12");
-// Imprimir las probabilidades posteriores
-        for (int i = 0; i < posteriorProbabilities.length; i++) {
-            System.out.println("Probabilidad posterior para la clase " + i + ": " + posteriorProbabilities[i]);
-        }
-
-
-    }
-*/
 }
