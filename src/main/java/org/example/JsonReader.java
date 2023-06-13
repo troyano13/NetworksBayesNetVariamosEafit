@@ -331,14 +331,29 @@ public class JsonReader {
                 int nPosX = Integer.parseInt(feature.getX());
                 int nPosY = Integer.parseInt(feature.getY());
                 m_BayesNet.addNode(feature.getId(), 2, nPosX, nPosY);
+                double[][] probabilities = {{0.4,0.6}};
+                m_BayesNet.setDistribution(feature.getId(),probabilities);
+                //double[][] probabilities = m_BayesNet.getDistribution(feature.getId());
+
+
+
+/*
+                for (int i = 0; i < probabilities.length; i++) {
+                    for (int j = 0; j < probabilities[i].length; j++) {
+                        System.out.println("*****************Value at (" + i + ", " + j + "): " + probabilities[i][j]);
+                        probabilities[i][j] = 0.3;  // Asignar un nuevo valor, por ejemplo, 0.0
+                        m_BayesNet.setDistribution((int) 0.2, probabilities);
+                    }
+                }*/
 
 
             } else if (feature.getLabel() == null) {
 
                 System.out.println("creacion arcos" + feature.getTarget());
                 m_BayesNet.addArc(feature.getTarget(), feature.getSource());
-
+                m_BayesNet.estimateCPTs();
                 System.out.println("CPT");
+
 
             } else {
                 break; // Finaliza el bucle cuando se encuentra un nodo nulo
