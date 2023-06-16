@@ -75,7 +75,7 @@ public class JsonReader {
         doc.getDocumentElement().normalize();
 
         ArrayList<Feature> features = new ArrayList<Feature>();
-        // Obtener una lista de todos los elementos 'root'
+        // Obtein the  'root' list
         NodeList rootList = doc.getElementsByTagName("root");
         for (int i = 1; i < rootList.getLength(); i++) {
 
@@ -111,8 +111,7 @@ public class JsonReader {
 
             }
         }
-
-        // Obtener una lista de todos los elementos 'abstract'
+        // Obtein 'abstract'
         NodeList abstractList = doc.getElementsByTagName("abstract");
         for (int i = 0; i < abstractList.getLength(); i++) {
 
@@ -141,16 +140,12 @@ public class JsonReader {
                 System.out.println("y: " + y);
                 System.out.println("width: " + width);
                 System.out.println("height: " + height);
-                System.out.println("------------------------A2----------------------------");
-
-                Feature feature = new Feature(label, labelParent, type, id, x, y, width, height, null, null);
+                 Feature feature = new Feature(label, labelParent, type, id, x, y, width, height, null, null);
                 features.add(feature);
 
             }
         }
-//
-
-        // Obtener una lista de todos los elementos 'concrete'
+        // Obtain 'concrete'
         NodeList concreteList = doc.getElementsByTagName("concrete");
         for (int i = 0; i < concreteList.getLength(); i++) {
             Node nodeC = concreteList.item(i);
@@ -354,9 +349,8 @@ public class JsonReader {
                 m_BayesNet.estimateCPTs();
                 System.out.println("CPT");
 
-
             } else {
-                break; // Finaliza el bucle cuando se encuentra un nodo nulo
+                break;
             }
 
         }
