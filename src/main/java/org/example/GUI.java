@@ -48,7 +48,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -2652,45 +2651,33 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
                     String sPa = P[iValue] * 100 + "";
 
-                    System.out.println("--sP%--" + sPa.substring(0, 3) + "%");
-                    //  printMarginWithNoParents(iNode, iValue);
+                    System.out.println("APRIOR PROBABILIDAD:" + sPa.substring(0, 3) + "%");
+
                     System.out.println("el nodo es::::::::::::INICIA::::::::::::::::::::::::" + m_BayesNet.getNodeName(iNode));
-                    double[] sPP = printMarginWithNoParents(iNode, iValue);
+                    printMarginWithNoParents(iNode, iValue);
                     System.out.println("el nodo es:::::::::::TERMINA::::::::::::::::::::::::" + m_BayesNet.getNodeName(iNode) + "::::IVALUE:::" + iValue);
 
-                    String result;
-/*
+
                     for (int i = 0; i < P.length; i++) {
-                        if (i == 0) {
+                        Double probability = P[0];
+                        if (iValue == 1) {
                             // No hacer nada en la primera iteración
                             continue;
                         }
-                        double valorActual = P[0];
-                        double valorAnterior = P[i - 1];
-                        double resultado = valorActual - (valorAnterior * 0.1);
-                        P[i] = resultado;
-                    }
-// Imprimir el array resultante
-                    for (double elemento : P) {
-                        System.out.print(elemento + " "+"***elemento**********************************");
-                    result= String.valueOf(elemento);
-                    }
-*/
-                    result = sPP[iValue] * 100 + "%";
+                        ;
+                        Double TwoProbability = 1 - probability;
+                        System.out.print("PROBABILIDAD POSTERIOR  SI: " + P[0] + "   NO:" + TwoProbability);
 
-                    if (result.length() > 3) {
-                        result = result.substring(0, 3);
-                    }
-
-                    String resultAprior = P[iValue] * 100 + "%";
-                    if (resultAprior.length() > 3) {
-                        resultAprior = resultAprior.substring(0, 3);
+                        g.drawString(m_BayesNet.getNodeValue(iNode, 0) + "                         PROB.  " + probability + "%", nPosX
+                                + m_nPaddedNodeWidth + (int) (probability * 100), nPosY + iValue * 10
+                                + 10);
                     }
 
                     g.fillRect(nPosX + m_nPaddedNodeWidth, nPosY + iValue * 10 + 2,
                             (int) (P[iValue] * 100), 8);
 
-                    g.drawString(m_BayesNet.getNodeValue(iNode, iValue) + " " + sP + " " + "   Prob  " + result + "%", nPosX
+
+                    g.drawString(m_BayesNet.getNodeValue(iNode, iValue) + " " + sP, nPosX
                             + m_nPaddedNodeWidth + (int) (P[iValue] * 100), nPosY + iValue * 10
                             + 10);
 
@@ -2756,76 +2743,51 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
 ///////////////////////////////////////
         private double[] getMargin(int iNode, int iValue) {
+
             double[] pFinal = new double[0];
-
-            System.out.println("in getMargin");
-            // Implementación de la función getMargin()
             double[] marginP = m_BayesNet.getMargin(iNode);
-            double result = 1.0; // Inicializar con 1 para la multiplicación
-
+            double result = 1.0;
 
             for (double value : marginP) {
-                System.out.println("in getMargin-------------------------------------------------" + value + "" + marginP[iValue]);
                 if (marginP[iValue] != 0) {
 
                     result *= value;
                     pFinal = new double[]{marginP[iValue]};
-                    System.out.println("El margin es2 " + marginP[iValue]);
-
                 }
-                System.out.println("El margin es 3" + marginP[iValue]);
                 pFinal = marginP;
-                System.out.println("¡¡¡¡¡" + pFinal[iValue]);
-
-
             }
-            System.out.println("El resultado de la multiplicación es: " + result);
-            // Retorna un arreglo con las probabilidades del nodo iNode
-            System.out.println("¡¡¡¡¡" + pFinal[0]);
             return pFinal;
         }
 
-        private boolean hasNoParents(int iNode) {
-            // Implementación de la función hasParents()
-            System.out.println("has parents node ---->" + iNode);
+        private boolean hasParents(int iNode) {
+
             ParentSet parentSet = m_BayesNet.getParentSet(iNode);
             int[] nrOfParents = new int[]{parentSet.getNrOfParents()};
 
             for (int nrOfparent : nrOfParents) {
                 int parent = nrOfparent;
-                // Retorna true si el nodo iNode tiene padres, false en caso contrario
-                if (parent != 0) {
-                    // El nodo no tiene padres
-                    System.out.println("falso");
-                    return true;
 
+                if (parent == 0) {
+                    return false;
                 }
-
             }
-            System.out.println("true---> sale!! con falso");
-            return false;
+            return true;
         }
 
         private int[] getParentSet(int iNodeP, double PosteriorFinal) {
 
-            // Implementación de la función getParentSet()
             int[] parentIndices = new int[0];
             try {
-                System.out.println("______get parets de node :" + iNodeP + "poster->" + PosteriorFinal);
                 FastVector classValues = new FastVector();
                 classValues.addElement("Class1");
                 classValues.addElement("Class2");
                 Attribute classAttribute = new Attribute("Class", classValues);
-
                 FastVector attributes = new FastVector();
                 attributes.addElement(classAttribute);
-
                 double[][] probabilities = m_BayesNet.getDistribution(iNodeP);
 
-                // Create and add attributes dynamically
                 for (int j = 0; j < probabilities[0].length; j++) {
                     Attribute attribute = new Attribute("Node" + (j + 1));
-                    System.err.println("Índice" + probabilities[0]);
                     attributes.addElement(attribute);
                 }
 
@@ -2838,7 +2800,6 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                     for (int j = 0; j < probabilities[i].length; j++) {
                         double posterior = probabilities[i][j];
                         if (j >= attributes.size()) {
-                            System.err.println("Índice inválido: " + j);
                             continue;
                         }
                         Attribute attribute = (Attribute) attributes.elementAt(j);
@@ -2849,39 +2810,28 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                 }
                 // Set class index
                 instances.setClassIndex(0);
-
+                System.out.println("__7");
                 BayesNet bayesNet = new BayesNet();
                 bayesNet.buildClassifier(instances);
 
-                // Get the indices of the parent nodes for the current node
                 BayesNet bayesNetModel = (BayesNet) m_BayesNet;
                 parentIndices = bayesNetModel.getParentSet(iNodeP).getParents();
-                // Calculate the product of parent margins
-                double product = 1.0;
-                if (parentIndices.length > 0) {
-                    for (int parentIndex : parentIndices) {
-                        double[] parentMarginals = m_BayesNet.getMargin(parentIndex);
-                        if (parentMarginals.length > 0) {
-                            product *= parentMarginals[0]; // Multiply by the first value of parentMarginals
-                        }
-                    }
-                }
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            // Retorna un arreglo con los índices de los padres del nodo iNode
             return parentIndices;
         }
 
         double[] pFinalDosLevel = new double[0];
 
+        /*
         private double[] printMarginWithNoParents(int iNodeP, int iValue) {
 
             double[] pFinal = new double[0];
             pFinalDosLevel = pFinalDosLevel;
 
-            if (!hasNoParents(iNodeP)) {
+            if (!hasParents(iNodeP)) {
                 System.out.println("print Margint--> node" + iNodeP);
                 // Si el nodo no tiene padres, imprimir su getMargin()
                 double[] margin = getMargin(iNodeP, iValue);
@@ -2903,7 +2853,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
                 for (int parentIndex : parentSet) {
                     System.out.println("debug stop");
-                    if (hasNoParents(parentIndex)) {
+                    if (hasParents(parentIndex)) {
                         System.out.println(" hasNoParents va a hasNode con false");
                         hasNoParents = false;
                         System.out.println("recursivo PrintMargin again!" + parentIndex + iValue);
@@ -2919,11 +2869,10 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
                 if (hasNoParents) {
                     double[] margin = getMargin(iNodeP, iValue);
                     System.out.println("¡¡¡¡¡" + margin[iValue]);
-                    System.out.println("--for---");
+
                     for (int parentIndex : parentSet) {
                         double[] marginParents = m_BayesNet.getMargin(parentIndex);
                         System.out.println("¡¡¡¡¡" + marginParents[iValue]);
-                        System.out.println("margin  Parents-->" + marginParents[iValue]);
 
                         if (marginParents[iValue] == 0.0) {
                             DecimalFormat df = new DecimalFormat("#.##");
@@ -2934,10 +2883,14 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
                             double[] marginParentsd = m_BayesNet.getMargin(parentIndex);
                             System.out.println("¡¡¡¡¡" + margint[iValue]);
+                            EditableBayesNet m_BayesNetFalsa = new EditableBayesNet(true);
+                            m_BayesNetFalsa = m_BayesNet;
+                            m_BayesNetFalsa.getParentSet(parentIndex);
+
+                            m_BayesNetFalsa .setMargin(parentIndex, margint);
                             System.out.println("***********margin todo los parents 0y1" + marginParentsd[0] + marginParentsd[1]);
-                            m_BayesNet.setMargin(parentIndex, margint);
-                            System.out.println("**set de nuevos parents");
-                            double[] marginParentsFalse = m_BayesNet.getMargin(parentIndex);
+
+                             double[] marginParentsFalse = m_BayesNetFalsa.getMargin(parentIndex);
                             System.out.println("**parents falsos" + marginParentsFalse[0] + "-" + marginParentsFalse[1]);
                             marginParentsChange = marginParentsFalse;
                             System.out.println("************salio if con ********" + marginParentsChange[iValue]);
@@ -2949,7 +2902,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
                     System.out.println(" no for parents margin actual-->" + margin[iValue]);
                     marginParentsIntern = margin;
-                    System.out.println(" un nuevo margin" + marginParentsIntern[iValue]);
+
                     System.out.println("¡¡¡¡¡" + marginParentsIntern[iValue]);
                     // Suponiendo que marginParentsChange y marginParentsIntern tienen la misma longitud
                     double[] resultado = new double[marginParentsChange.length];
@@ -2971,25 +2924,39 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
                 if (!hasNoParents) {
                     System.out.println("nuevo!");
+                    EditableBayesNet m_BayesNetFalsa = new EditableBayesNet(true);
+                    m_BayesNetFalsa = m_BayesNet ;
 
+                    int[] parentSetT = getParentSet(iNodeP, iValue);
+                    System.out.println(" getParentSet  de:" + iNodeP + "ivalue" + iValue);
 
-                    marginParentsChange = pFinalDosLevel;
-                    double[] marginT = getMargin(iNodeP, iValue);
+                    for (int parentIndex : parentSet) {
+                        System.out.println("debug stop");
+                        if (hasParents(parentIndex)) {
+                            System.out.println(" hasNoParents va a hasNode con false");
+                            hasNoParents = false;
+                            System.out.println("recursivo PrintMargin again!" + parentIndex + iValue);
+                            printMarginWithNoParents(parentIndex, iValue);
+                            System.out.println("----");
 
-                    System.out.println("marginParentsChange"+marginParentsChange[0]+""+pFinalDosLevel[0]);
+                        }
+                        marginParentsChange = pFinalDosLevel;
+                        double[] marginT = getMargin(iNodeP, iValue);
 
-                    marginParentsIntern = marginT;
+                        System.out.println("marginParentsChange"+marginParentsChange[0]+""+pFinalDosLevel[0]);
 
-                    double[] resultado = new double[marginParentsChange.length];
+                        marginParentsIntern = marginT;
 
-                    for (int i = 0; i < marginParentsChange.length; i++) {
-                        System.out.println("for pasaje....l3..!" + marginParentsChange[i] + marginParentsIntern[i]);
-                        resultado[i] = marginParentsChange[i] * marginParentsIntern[i];
-                        pFinal = resultado;
-                        System.out.println("¡¡¡¡¡" + pFinal[i]);
+                        double[] resultado = new double[marginParentsChange.length];
 
-                        pFinalDosLevel = resultado;
+                        for (int i = 0; i < marginParentsChange.length; i++) {
+                            System.out.println("for pasaje....l3..!" + marginParentsChange[i] + marginParentsIntern[i]);
+                            resultado[i] = marginParentsChange[i] * marginParentsIntern[i];
+                            pFinal = resultado;
+                            System.out.println("¡¡¡¡¡" + pFinal[i]);
 
+                            pFinalDosLevel = resultado;
+                    }
                     }
                 }
             }
@@ -2998,7 +2965,35 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
             return pFinal;
 
         }
-        ////////////////////////////////
+        /////////////////////////////////////////////////////////////////////77
+        /// init red bayesiana  utlima
+*/
+
+        private double[] printMarginWithNoParents(int iNodeP, int iValue) {
+
+            double[] pFinal = new double[0];
+            pFinalDosLevel = pFinalDosLevel;
+
+            if (!hasParents(iNodeP)) {
+
+                double[] probability = new double[]{m_BayesNet.getProbability(iNodeP, iNodeP, iValue)};
+                double[] margin = getMargin(iNodeP, iValue);
+                pFinal = margin;
+
+            } else {
+
+                int[] parentSet = getParentSet(iNodeP, iValue);
+                for (int parentIndex : parentSet) {
+                    System.out.println("debug stop, con padres-->" + parentIndex + "es.." + m_BayesNet.getNodeName(iNodeP));
+                }
+            }
+            return pFinal;
+
+        }
+
+
+        /// fin rede bayesiana
+        /////////////////////////////////////////////////////////////////////
 
         /**
          * This method draws an arrow on a line from (x1,y1) to (x2,y2). The arrow
